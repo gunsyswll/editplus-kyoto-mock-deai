@@ -3,7 +3,7 @@ Theme Name: EditPlus Kyoto Concierge
 Theme URI: https://github.com/takumin-2525/editplus-web-renewal
 Author: 高速オフセット / 株式会社エディットプラス
 Description: 京都・大阪観光コンシェルジュ リニューアル用の自作テーマ。60_デザイン/kyoto-concierge-rough.html のデザインを再現。
-Version: 0.9.6
+Version: 0.9.7
 Requires at least: 6.0
 Requires PHP: 8.0
 Text Domain: editplus-kyoto
@@ -56,6 +56,19 @@ a:hover .imgwrap img{transform:scale(1.06)}
 .brand{display:flex;flex-direction:column;line-height:1.15;flex:none}
 .brand .jp{font-family:var(--mincho);font-size:20px;letter-spacing:.16em;font-weight:600}
 .brand .en{font-family:var(--serif);font-size:9.5px;letter-spacing:.36em;opacity:.72;text-transform:uppercase;margin-top:3px}
+/* 英語・スペイン語はサイト名も項目も長く、日本語より100〜300px幅を食う（EN 315px / ES 396px vs JA 254px）。
+   そのままだと app.js の「1行に入らなければ ≡ に逃がす」が PC 幅でも効いて、EN/ES だけ項目が消えた（2026-09-17）。
+   ロゴを一回り小さく・字間を詰め、ナビの間隔も詰めて、日本語と同じ幅で1行に収める */
+html[lang^="en"] .brand .en{display:none} /* 英語では上の行と同じ文言の重複になる（PC・スマホとも） */
+@media (min-width:841px){
+  html[lang^="en"] .brand .jp,html[lang^="es"] .brand .jp{font-size:16px;letter-spacing:.05em}
+  html[lang^="en"] nav.main,html[lang^="es"] nav.main{gap:20px;letter-spacing:.02em}
+}
+/* スマホでも同じ理由で、スペイン語のサイト名（30字）が地球アイコンに食い込んでいた。字を落として1行に収める */
+@media (max-width:840px){
+  html[lang^="en"] .brand .jp{font-size:14px;letter-spacing:.04em}
+  html[lang^="es"] .brand .jp{font-size:12.5px;letter-spacing:.02em}
+}
 /* トップの各セクション → 別ページ（現在地から探す）の順。項目が増えたので間隔を詰めた。
    区切り線は入れない（2026-09-17）。線を1本引くほど別扱いにする価値が無く、
    言語の地球・ハンバーガーと縦線が近くで3つ並んで、ヘッダーが騒がしくなるだけだった。
