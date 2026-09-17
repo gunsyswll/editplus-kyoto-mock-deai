@@ -13,6 +13,7 @@
 	var t = function (key, fallback) { return T[key] || fallback; };
 
 	var btn = document.getElementById('nearbyStart');
+	var fv = document.getElementById('nearbyFv');
 	var msg = document.getElementById('nearbyMsg');
 	var fallback = document.getElementById('nearbyFallback');
 	var jump = document.getElementById('nearbyJump');
@@ -38,6 +39,7 @@
 
 	function fail(text) {
 		btn.disabled = false;
+		if (fv) fv.classList.remove('is-locating');
 		say(text);
 		if (fallback) fallback.hidden = false;
 	}
@@ -61,6 +63,7 @@
 					return;
 				}
 				btn.disabled = false;
+				if (fv) { fv.classList.remove('is-locating'); fv.classList.add('is-done'); }
 				say('');
 				if (fallback) fallback.hidden = true;
 				if (r.json.count) {
@@ -81,7 +84,8 @@
 				quizEl.innerHTML = '';
 				window.epQuizMount(quizEl, { origin: origin });
 
-				btn.firstChild.nodeValue = t('relocate', '現在地を取り直す');
+				var label = btn.querySelector('.geo-label');
+				if (label) label.textContent = t('relocate', '現在地を取り直す');
 				if (!fromHistory) nearSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
 			})
 			.catch(function () {
@@ -91,6 +95,7 @@
 
 	btn.addEventListener('click', function () {
 		btn.disabled = true;
+		if (fv) fv.classList.add('is-locating'); // レーダーの回転を速める＝探している最中だと分かる
 		say(t('geoLocating', '位置情報を取得しています…'));
 		// 場所を取り直したら、前の場所で作ったコースは捨てる（別の起点の結果を出さない）
 		try { sessionStorage.removeItem('epQuizResult_geo'); } catch (e) { /* 無視 */ }
