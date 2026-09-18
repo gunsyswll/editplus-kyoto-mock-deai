@@ -3,7 +3,7 @@ Theme Name: EditPlus Kyoto Concierge
 Theme URI: https://github.com/takumin-2525/editplus-web-renewal
 Author: 高速オフセット / 株式会社エディットプラス
 Description: 京都・大阪観光コンシェルジュ リニューアル用の自作テーマ。60_デザイン/kyoto-concierge-rough.html のデザインを再現。
-Version: 0.9.12
+Version: 0.9.14
 Requires at least: 6.0
 Requires PHP: 8.0
 Text Domain: editplus-kyoto
@@ -281,7 +281,10 @@ section{padding:46px 0}
    読みやすくするための暗幕や影が要らない。写真は半分の幅なので粗さも出ない。
    探す操作は「箱」にせず、下線1本の入力欄と文字だけのタブで組む（予約ウィジェットに見せない）。
    ヘッダーはこのページでは最初から solid（写真の上に置かないため）。 */
-.hotel-fv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin-top:74px;
+/* padding:0 は section{padding:46px 0} の打ち消し。書き忘れると**写真の上に和紙色の帯が46px出て、
+   見開きが画面の上端から始まらない**（.hsec / .related は打ち消し済みだった）
+   → 40_計画・進行/タスク/BUG_全画面の欄に意図しない上下余白.md */
+.hotel-fv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin-top:74px;padding:0;
   min-height:min(720px,calc(100vh - 74px));background:var(--washi)}
 .fv-photo{position:relative;overflow:hidden;background:#232b48}
 /* 写真は下側（石段と灯籠）を使う。上側は奉納札の白い縦文字と紙垂が入り、横長に切ると壊れた表示に見える */
@@ -357,8 +360,6 @@ section{padding:46px 0}
 /* 写真クレジットは写真の上（右下）に置く。本文側の余白を取らない */
 .hotel-fv--single .photo-credit{position:absolute;right:16px;bottom:12px;margin:0;color:rgba(255,255,255,.72)}
 
-/* ヒーローの下は通常の下層ページ余白（ヘッダーぶんの150pxは不要） */
-.page-main--after-hero{padding:72px 0 88px}
 /* section の既定 padding:88px を打ち消し、ページ内ブロックとして積む */
 .hsec{padding:0;margin-top:80px;scroll-margin-top:100px}
 .hsec:first-child,.hsec[hidden]+.hsec{margin-top:0}
@@ -407,6 +408,10 @@ section{padding:46px 0}
 
 /* ============ single spot / 下層ページ共通 ============ */
 .page-main{padding:150px 0 88px}
+/* ヒーローの下は、ヘッダーぶんの150pxが要らない。
+   **.page-main より後ろに置くこと。**詳細度が同じなので、前に書くと効かない
+   （2026-09-17 まで実際に効いておらず、/hotel/・ホテル個別・/nearby/ の3画面が150pxのままだった） */
+.page-main--after-hero{padding:72px 0 88px}
 .breadcrumb{font-size:12px;color:var(--sumi-faint);margin-bottom:26px;letter-spacing:.04em}
 .breadcrumb a:hover{color:var(--sumi)}
 .single-head .meta-top{display:flex;gap:8px;margin-bottom:14px}
@@ -423,11 +428,103 @@ section{padding:46px 0}
 /* セクション共通の padding:88px を打ち消す（下層ページでは詰めて並べたい） */
 .hotel-section{padding:0;margin-top:44px;scroll-margin-top:120px}
 .hotel-back{margin-top:56px;font-family:var(--mincho);letter-spacing:.08em}
-/* 現在地から探す（/nearby/）。位置情報が取れるまで①②とアンカーは hidden で出す。
+/* ============ いまいる場所から（/nearby/）============
+   2026-09-17 に作り直し → 60_デザイン/2026-09-17_現在地から探す画面のデザイン監査.md
+   ・FVは /hotel/ と同じ見開きを流用（このページだけサイトの視覚言語から外れていた）
+   ・結果はカードではなく罫線の行（.nb-list）。**公開スポット309件のうち写真は2件**しか無く、
+     3:2のカードを並べると実際に出るのは「No Image」のグレーだけになる
+   位置情報が取れるまで①②とアンカーは hidden で出す。
    .hotel-jump / .hotel-fallback は display を持つので、hidden 属性だけでは消えない */
 .hotel-jump[hidden],.hotel-fallback[hidden]{display:none}
-.nearby-locate{margin-top:8px}
-.nearby-locate .finder-go[hidden]{display:none}
+
+.nearby-fv .fv-body .kicker{display:block;margin:0 0 14px}
+/* 「いまいる場所から、」9文字が右カラム（最大540px）に1行で入る級数 */
+.nearby-fv .fv-title{font-size:clamp(26px,2.7vw,40px)}
+.nearby-locate{margin-top:30px}
+/* 画面で押せるものはこれ1つ。以前は下線1本の文字リンクで、パンくずと同じ太さだった */
+.nearby-btn{padding:15px 34px;font-size:14px;cursor:pointer;background:none;font-weight:inherit}
+.nearby-btn[hidden]{display:none}
+.nearby-btn[disabled]{opacity:.5;cursor:default}
+.nearby-privacy{margin-top:12px}
+
+/* 取れたあと：写真と説明文を畳み、空いた場所に「どこにいると受け取ったか」を出す。
+   見出し（h1）は残す ―― 畳むのは押す前にだけ要るものだけ。
+   section 共通の padding:46px も外す（写真が無くなると、ただの空白として見える） */
+.nearby-fv--done{min-height:0;padding:0;grid-template-columns:1fr;border-bottom:1px solid var(--line)}
+.nearby-fv--done .fv-photo{display:none}
+.nearby-fv--done .fv-body{padding:38px clamp(30px,5.5vw,88px) 30px}
+.nearby-fv--done .fv-inner{max-width:1140px;margin:0 auto}
+.nearby-fv--done .fv-title{font-size:clamp(23px,2.2vw,30px)}
+.nearby-fv--done .fv-title br{display:none}
+.nearby-fv--done .fv-sub,.nearby-fv--done .nearby-privacy,.nearby-fv--done .nearby-btn{display:none}
+.nearby-fv--done .nearby-locate{margin-top:0}
+.nearby-state{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:14px}
+/* 取得前は状態（取得中・失敗）、取得後は結果の要約。同じ要素が兼ねる */
+.nearby-where{margin:0;font-size:12.5px;line-height:1.8;color:var(--sumi-faint);min-height:1.8em}
+.nearby-fv--done .nearby-where{font-size:14px;color:var(--sumi-soft);min-height:0}
+.nearby-again[hidden]{display:none}
+.nearby-again{border:0;background:none;padding:0 0 3px;cursor:pointer;font-family:var(--gothic);font-size:13px;
+  letter-spacing:.08em;color:var(--sumi-soft);border-bottom:1px solid var(--line)}
+.nearby-again:hover{color:var(--indigo);border-color:var(--indigo)}
+
+/* 押す前の手順。/hotel/ の .steps と同じ部品（縦罫と欧文の番号だけ）。
+   .steps は3列だが**ここは2つしか無いので2列にする**。3列のままだと右端が1枠空いて、
+   手順が欠けているように見える（「ブラウザが位置情報を聞きます」はボタンの下に移した）。
+
+   **見開きの右半分の中**に置く。柱1本ぶんの幅しか無いので、/hotel/ の寸法のままだと
+   入らない：段の間を34px→24pxに詰め、見出しを18px→15px、本文を13.5px→12.5pxに落とす。
+   見出しとボタンから離すため上に42px空ける（罫線は引かない。ここは欄の切れ目ではない） */
+.nearby-steps{margin:42px 0 0;grid-template-columns:repeat(2,1fr)}
+.nearby-steps[hidden]{display:none}
+/* **右の空けを書き落とさないこと。**縦罫は次の段の左端に立つので、右を0にすると
+   1段目の文字が罫にそのまま届く。基本の .step は `padding:4px 34px 4px 28px` で
+   右34pxを持っているが、ここでショートハンドごと書き換えると**それも消える**
+   （2026-09-18、幅を狭めたときに文字と縦罫がくっついて発覚） */
+.nearby-steps .step{padding:0 24px}
+.nearby-steps .step:first-child{padding-left:0}
+.nearby-steps .step-no{font-size:10.5px;letter-spacing:.28em}
+.nearby-steps h2{font-family:var(--mincho);font-size:15px;letter-spacing:.05em;margin:9px 0 7px;font-weight:600;line-height:1.5}
+.nearby-steps .step p{font-size:12.5px;line-height:1.85}
+
+/* 取得前、main に出ているのは「位置情報を使わないときは」の1枚だけ。
+   .hotel-fallback の上余白88pxは**上に欄がある前提**の値なので、見開きの直後だと
+   ページ上余白72pxと合わせて160px空く。欄が出てから本来の値に戻す（nearby.js が body に付ける）。
+
+   罫線も同じ理由で引かない。.hotel-fallback の上罫は**欄と欄の切れ目**を示す線で、
+   /hotel/ では「近くの場所」の欄に続けて出るから意味がある。取得前の /nearby/ は
+   **上に欄が無い**ので、何も区切っていない線が1本浮くだけになる */
+#nearbyFallback{margin-top:24px;padding-top:0;border-top:0}
+.nearby-located #nearbyFallback{margin-top:88px;padding-top:40px;border-top:1px solid var(--line)}
+
+/* ジャンルの絞り込み。飲食105・物販81で全体の6割を占めるため、近い順のままだと
+   百貨店・家電量販店が上位に並ぶ。並び順をいじらず、選ばせて解く */
+.nb-genres{margin:0 0 24px}
+.nb-genres[hidden]{display:none}
+.nb-chip{cursor:pointer;font-family:inherit;line-height:inherit}
+.nb-chip.on{background:var(--sumi);border-color:var(--sumi);color:var(--washi)}
+.nb-chip.on:hover{color:var(--washi)}
+
+/* 結果の行。右端に**この画面にしか無い情報＝距離**を置く（/hotel/ の .hlist と同じ考え方） */
+.nb-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.nb-list[hidden]{display:none}
+/* 右の列は幅を固定する。auto にすると Map/Tel の有無で列幅が行ごとに変わり、
+   徒歩分数が階段状にずれて「近い順」が目で追えなくなる */
+.nb-row{display:grid;grid-template-columns:minmax(0,1fr) clamp(104px,10vw,132px);column-gap:24px;align-items:baseline;
+  padding:17px 6px;border-bottom:1px solid var(--line);transition:background .2s}
+.nb-row[hidden]{display:none}
+.nb-row:hover{background:var(--card)}
+.nb-name{grid-column:1;font-family:var(--mincho);font-size:17px;letter-spacing:.04em;font-weight:600;margin:0;line-height:1.5}
+.nb-row:hover .nb-name a{color:var(--indigo)}
+.nb-meta{grid-column:1;margin:3px 0 0;font-size:12px;line-height:1.6;color:var(--sumi-faint)}
+/* 距離は名前と同じ行の高さに。以前は12pxで Map / Tel と並んでいて、近い順の意味が読めなかった */
+/* 折り返しを止めない。日本語の「徒歩約81分」は7字だが、英語 About 81 min walk・
+   スペイン語 A unos 81 min a pie は固定幅を超える。はみ出させるより2行にする */
+.nb-walk{grid-column:2;grid-row:1;margin:0;font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+  line-height:1.5;color:var(--indigo);text-align:right}
+.nb-acts{grid-column:2;grid-row:2;margin:4px 0 0;display:flex;gap:14px;justify-content:flex-end;
+  font-size:11.5px;color:var(--sumi-faint);white-space:nowrap}
+.nb-acts a{color:var(--indigo-soft);text-underline-offset:3px}
+.nb-acts a:hover{color:var(--indigo);text-decoration:underline}
 /* トップの診断は独立セクションなので上下に余白と最低高さを持つが、
    ページ内に埋め込むときはそれが空白として見えるので外す */
 .quiz--inline{min-height:0;max-width:none;display:block;text-align:left}
@@ -540,15 +637,17 @@ section{padding:46px 0}
   .lsheet,.lsheet-scrim,.lsheet-panel{transition:none}
 }
 
-/* ログイン中はWPの管理バーが最上部に挟まるので、固定要素をその高さぶん下げる。
-   （.admin-bar クラスはログイン中だけ body に付く） */
+/* ログイン中はWPの管理バーが最上部に挟まるので、**固定要素だけ**をその高さぶん下げる。
+   （.admin-bar クラスはログイン中だけ body に付く）
+
+   .hotel-fv には足さない。WPが `html{margin-top:32px}` で文書そのものを下げているので、
+   通常フローの margin-top に管理バーぶんを足すと**二重に下がり、見開きの上に31pxの帯が出る**。
+   下げる必要があるのは position:fixed の2つ（文書の流れの外にいるので html の margin が効かない）だけ */
 .admin-bar .site-header{top:32px}
 .admin-bar .mnav{top:32px}
-.admin-bar .hotel-fv,.admin-bar .nearby-fv{margin-top:calc(74px + 32px)}
 @media(max-width:782px){
   .admin-bar .site-header{top:46px}
   .admin-bar .mnav{top:46px}
-  .admin-bar .hotel-fv,.admin-bar .nearby-fv{margin-top:calc(60px + 46px)}
 }
 
 /* ============ 検索結果ページ・絞り込み ============ */
@@ -627,6 +726,18 @@ section{padding:46px 0}
   .hotel-fv--compact .fv-inner{grid-template-columns:1fr;gap:22px}
   .hotel-fv--compact .fv-title{font-size:22px}
   .hotel-fv--compact .fv-title br{display:inline} /* 1行にすると「京都／へ。」で折れるので、改行は残す */
+  /* /nearby/ */
+  .nearby-fv--done .fv-body{padding:32px 30px 28px}
+  .nearby-state{margin-top:14px;gap:12px}
+  .nearby-btn{padding:14px 28px}
+  /* 縦積みになるので、左の空けではなく上下の空けで区切る（.step のモバイル指定に合わせる） */
+  .nearby-steps{margin-top:32px}
+  .nearby-steps .step{padding:18px 0 0}
+  .nearby-steps .step:first-child{padding-top:0}
+  /* 行は名前＋距離の2列のまま。Map/Tel は幅を食うので名前の下に回す */
+  .nb-row{column-gap:14px;padding:15px 2px}
+  .nb-name{font-size:16px}
+  .nb-acts{grid-column:1;grid-row:3;justify-content:flex-start;margin-top:7px}
   .page-main--after-hero{padding:52px 0 64px}
   .hsec{margin-top:60px}
   .steps{grid-template-columns:1fr}
@@ -635,7 +746,6 @@ section{padding:46px 0}
   .hlist a{padding:16px 2px;grid-template-columns:1fr auto;column-gap:14px}
   .hl-name{font-size:16px}
   .hotel-fallback{margin-top:64px;grid-template-columns:1fr;gap:26px}
-}
 }
 
 @media(max-width:360px){
@@ -821,35 +931,4 @@ body.book-zoomed{overflow:hidden}
   .book-toc{columns:1}
   .book-top-body{grid-template-columns:1fr}
   .book-cover{max-width:220px}
-}
-
-/* ===== 現在地から探す（/nearby/）の見開き =====
-   左は /hotel/ と同じ写真（レーダーの図案は「変」と言われて写真に戻した）、
-   右は見出しと、押したくなる大きさの「現在地を使う」。2026-09-17 に文字だけの画面から作り直した */
-.nearby-fv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin-top:74px;min-height:min(720px,calc(100vh - 74px));border-bottom:1px solid var(--line)}
-.nearby-body{display:flex;align-items:center;padding:clamp(40px,5vh,96px) clamp(30px,5.5vw,88px)}
-.nearby-inner{width:100%;max-width:560px}
-.nearby-inner .breadcrumb{margin-bottom:28px}
-.nearby-inner .kicker{display:block;margin-bottom:14px}
-.geo-btn{display:inline-flex;align-items:center;gap:16px;margin-top:28px;background:var(--sumi);color:var(--washi);border:1px solid var(--sumi);
-  padding:17px 30px 17px 20px;font-family:var(--mincho);font-size:16px;letter-spacing:.16em;cursor:pointer;transition:background .25s,border-color .25s,transform .25s}
-.geo-btn:hover{background:var(--indigo);border-color:var(--indigo);transform:translateY(-1px)}
-.geo-btn[disabled]{opacity:.75;cursor:default;transform:none}
-.geo-icon{position:relative;width:26px;height:26px;border:1.5px solid currentColor;border-radius:50%;flex:none}
-.geo-icon i{position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:currentColor}
-.geo-icon::before{content:"";position:absolute;left:50%;top:-7px;width:1.5px;height:6px;margin-left:-.75px;background:currentColor;box-shadow:0 27px 0 currentColor}
-.geo-icon::after{content:"";position:absolute;top:50%;left:-7px;width:6px;height:1.5px;margin-top:-.75px;background:currentColor;box-shadow:27px 0 0 currentColor}
-.is-locating .geo-icon i{animation:ep-blink 1s ease-in-out infinite}
-@keyframes ep-blink{50%{opacity:.15}}
-.nearby-locate .finder-note{margin:12px 0 0}
-.nearby-locate #nearbyMsg:empty{display:none}
-.nearby-steps{list-style:none;margin:34px 0 0;padding:24px 0 0;border-top:1px solid var(--line);display:grid;gap:11px;font-size:14px;color:var(--sumi-soft)}
-.nearby-steps li{display:flex;gap:14px;align-items:baseline}
-.nearby-steps .no{font-family:var(--serif);font-size:11px;letter-spacing:.2em;color:var(--gold-ink);flex:none}
-@media(max-width:840px){
-  .nearby-fv{grid-template-columns:1fr;margin-top:60px;min-height:0;padding:0} /* 上の section{padding:34px 0} を打ち消す */
-  .nearby-body{padding:30px 20px 36px}
-  .nearby-inner .breadcrumb{margin-bottom:20px}
-  .geo-btn{width:100%;justify-content:center;margin-top:22px;padding:16px 20px}
-  .nearby-steps{margin-top:26px}
 }
