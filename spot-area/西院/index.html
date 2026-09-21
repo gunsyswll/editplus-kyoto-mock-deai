@@ -844,6 +844,8 @@ exports.init = init;
                         if (block.indexOf('class="noimg"') < 0) { return block; }
                         var m = block.match(/<h[34]>\s*<a[^>]*>([\s\S]*?)<\/a>/);
                         var name = m ? m[1].trim() : "";
+                        // 面が見出しになるので、下の同じ名前は読み上げ用に隠す
+                        block = block.replace(/<h([34])>(\s*<a)/, '<h$1 class="screen-reader-text">$2');
                         return block.replace(/<div class="noimg">[\s\S]*?<\/div>/,
                             '<div class="noimg"><span class="noimg-name">' + name + "</span></div>");
                     });
