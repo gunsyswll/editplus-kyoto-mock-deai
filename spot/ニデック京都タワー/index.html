@@ -219,16 +219,17 @@
         </div>
 
         <script>
-/* デモ用（2026-09-21）: 静的書き出しのHTMLは資産を客先サーバの絶対URLで読んでいるため、
-   このリポジトリに置いた style.css / quiz.js が使われなかった。staticrypt の
-   replaceHtmlCallback フックで、資産のURLだけを同じ配信元に向け直す。
-   書き換えるのは**この書き出しに実在する3つの入れ物だけ**（themes/editplus-kyoto,
-   plugins/instagram-feed, uploads/2026）。ep-book・wp-includes・サイトアイコンは
-   この書き出しに含まれていないので、書き換えると404になる。触らず客先から読ませる。
-   /wp-json/（診断のAPI）も書き換えない＝動きは変えていない。 */
+/* デモ用（2026-09-21）: この静的書き出しは資産もリンクも
+   https://takumin-2525.github.io/editplus-kyoto-mock/... という**元リポジトリの絶対URL**で
+   持っている。フォークしただけでは、ページは元リポジトリのファイルを読み続けるので、
+   こちらで差し替えた style.css / quiz.js は一度も使われない。
+   staticrypt の replaceHtmlCallback フック（復号後にHTMLを渡してくる公式の口）で、
+   その土台だけを このフォークの土台に置き換える。ファイルの木は元と同じなので、
+   読めるものと読めないものは元のまま変わらない。
+   診断API（kankou-concierge-test.com/wp-json/）は触らない＝動きは変えていない。 */
 function replaceHtmlCallback(plainHTML) {
-    var fixed = plainHTML.replace(
-        /https:\/\/kankou-concierge-test\.com(\/wp-content\/(?:themes\/editplus-kyoto|plugins\/instagram-feed|uploads\/2026)\/)/g, "$1");
+    var base = "/" + location.pathname.split("/")[1];
+    var fixed = plainHTML.split("https://takumin-2525.github.io/editplus-kyoto-mock").join(base);
     document.write(fixed);
     document.close();
 }
