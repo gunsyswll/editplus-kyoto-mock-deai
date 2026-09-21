@@ -222,10 +222,13 @@
 /* デモ用（2026-09-21）: 静的書き出しのHTMLは資産を客先サーバの絶対URLで読んでいるため、
    このリポジトリに置いた style.css / quiz.js が使われなかった。staticrypt の
    replaceHtmlCallback フックで、資産のURLだけを同じ配信元に向け直す。
-   /wp-json/（診断のAPI）は書き換えない＝動きは変えていない。 */
+   書き換えるのは**この書き出しに実在する3つの入れ物だけ**（themes/editplus-kyoto,
+   plugins/instagram-feed, uploads/2026）。ep-book・wp-includes・サイトアイコンは
+   この書き出しに含まれていないので、書き換えると404になる。触らず客先から読ませる。
+   /wp-json/（診断のAPI）も書き換えない＝動きは変えていない。 */
 function replaceHtmlCallback(plainHTML) {
     var fixed = plainHTML.replace(
-        /https:\/\/kankou-concierge-test\.com(\/wp-(?:content|includes)\/)/g, "$1");
+        /https:\/\/kankou-concierge-test\.com(\/wp-content\/(?:themes\/editplus-kyoto|plugins\/instagram-feed|uploads\/2026)\/)/g, "$1");
     document.write(fixed);
     document.close();
 }
