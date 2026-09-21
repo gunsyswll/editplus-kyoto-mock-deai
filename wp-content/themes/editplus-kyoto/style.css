@@ -26,6 +26,11 @@ Text Domain: editplus-kyoto
   --gothic:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Noto Sans JP",system-ui,sans-serif;
   --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
   --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  /* 字間は5段だけ（2026-09-21）。98箇所・21種類の letter-spacing が散っていて、どこを見ても
+     同じ「字間を広げた組み」に見えるのが既視感の芯だった。大きい字ほど詰める（光学的補正）。
+     段を足したくなったら、まず既存の段で足りない理由を書くこと
+     → 60_デザイン/2026-09-16_おすすめ情報のデザイン監査.md の「共通の作法」7 */
+  --tr-display:.02em; --tr-head:.04em; --tr-body:.06em; --tr-meta:.1em; --tr-label:.2em;
 }
 /* ダークモードは出さない（2026-09-11 定例で廃止に合意。端末の設定に関わらず和紙の地で見せる） */
 
@@ -119,7 +124,7 @@ nav.main a:hover{opacity:1}
     linear-gradient(90deg,rgba(24,30,56,.34),rgba(24,30,56,0) 58%)}
 .hero .inner{position:relative;z-index:2;width:100%;padding-bottom:74px}
 .eyebrow{font-family:var(--serif);font-size:11px;letter-spacing:.42em;text-transform:uppercase;opacity:.85;margin:0 0 18px}
-.htitle{font-family:var(--mincho);font-weight:600;font-size:clamp(40px,6.2vw,76px);letter-spacing:.08em;
+.htitle{font-family:var(--mincho);font-weight:500;font-size:clamp(40px,6.2vw,76px);letter-spacing:var(--tr-display);
   margin:0;line-height:1.24;text-shadow:0 2px 30px rgba(0,0,0,.4)}
 /* 見出し下の説明。英字の飾り文（大文字・字間広め）から、読める日本語の1文に変えた。
    ゴシック・字間控えめ・行間広めで、見出しの明朝と役割を分ける */
@@ -131,6 +136,8 @@ nav.main a:hover{opacity:1}
   box-shadow:0 24px 60px -26px rgba(0,0,0,.7)}
 .hero-search input{flex:1;min-width:0;border:0;background:transparent;color:#191b18;font-family:var(--gothic);font-size:14.5px;padding:16px 20px;outline:none}
 .hero-search input::placeholder{color:var(--sumi-faint)}
+/* outline:none のままだと、キーボードで辿ったとき検索欄だけ現在地が見えない（実測：12箇所中ここだけ） */
+.hero-search:focus-within{box-shadow:0 0 0 2px var(--indigo),0 24px 60px -26px rgba(0,0,0,.7)}
 .hero-search button{border:0;background:var(--indigo);color:#fff;font-family:var(--mincho);letter-spacing:.2em;font-size:14px;padding:0 30px;cursor:pointer}
 
 /* ============ sections ============ */
@@ -139,14 +146,21 @@ nav.main a:hover{opacity:1}
    「中身が途切れているのか、次の欄が始まったのか」が読めなくなる */
 section{padding:46px 0}
 .shead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;gap:20px}
-.shead .ttl{font-family:var(--mincho);font-size:clamp(23px,3vw,32px);letter-spacing:.1em;font-weight:600;margin:0}
+/* アイブロウを外したぶん、欄の頭は見出し1本で立たせる。最大32pxでは本文との落差が小さく、
+   どの欄も同じ重さに見えていた。太らせずに級数で差をつける（600だと大きい級数で野暮ったい） */
+.shead .ttl{font-family:var(--mincho);font-size:clamp(28px,3.9vw,46px);letter-spacing:var(--tr-head);font-weight:500;margin:0;line-height:1.32}
 .shead .more{font-size:12.5px;color:var(--sumi-soft);letter-spacing:.06em;white-space:nowrap}
 .rule{height:1px;background:var(--line);margin:22px 0 36px}
 /* 欄と欄のあいだに横線は引かない（2026-09-16）。一度は欄の頭に1本入れたが、
    カード1枚ずつに枠が戻って境目が読めるようになり、線が重複して見えるのでやめた。
    .top-sec は「トップの通常欄」の目印として残してある（欄をまたいで当てるときの掛かり）
    → 60_デザイン/2026-09-16_欄の区切りをどう見せるか.md */
-.kicker{font-family:var(--serif);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-ink);display:inline-block}
+/* 見出しの上に欧文の小ラベルを置く「アイブロウ」は装置として廃止（2026-09-21）。
+   トップだけで10回、サイト全体で26回、同じものが同じ位置に出ていた。
+   「英字の小さな大文字は装飾としては綺麗だが、初見の旅行者には情報にならない」
+   （2026-09-15・野口指摘）はヒーローだけの話ではない。残すのはタグ名など“中身”が入る箇所だけ
+   なので、日本語が入っても壊れない組みにする（等幅欧文・全大文字をやめる） */
+.kicker{font-family:var(--gothic);font-size:12px;letter-spacing:var(--tr-meta);color:var(--sumi-soft);display:inline-block}
 
 /* browse: エリア×ジャンル */
 .axes{display:grid;grid-template-columns:1fr 1fr;gap:26px}
@@ -159,12 +173,13 @@ section{padding:46px 0}
 /* quiz: AIコンシェルジュ診断（rough.html の .quiz-sec 移植） */
 .quiz-sec{background:var(--panel);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .quiz-inner{text-align:center}
-.q-eyebrow{font-family:var(--serif);font-size:12px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold)}
+/* .q-eyebrow は廃止（2026-09-21）。.kicker と同じ装置が別名で1つだけ生き残っていた */
 .q-head{font-family:var(--mincho);font-size:clamp(27px,4vw,42px);letter-spacing:.08em;color:var(--sumi);margin:14px 0 14px;font-weight:600;line-height:1.35}
 .q-sub{color:var(--sumi-soft);font-size:15px;margin:0 auto 42px;max-width:46ch}
 .quiz{max-width:720px;margin:0 auto;text-align:center;min-height:340px;display:flex;flex-direction:column;justify-content:center}
 .q-step{animation:fadeup .35s ease both}
-.q-prog{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--gold);margin-bottom:18px}
+/* 金 #9a8348 は --panel の上で 3.45:1 しかなく AA（4.5:1）を満たさない。読ませる文字なので gold-ink へ */
+.q-prog{font-family:var(--gothic);font-size:11.5px;letter-spacing:var(--tr-meta);color:var(--gold-ink);margin-bottom:18px}
 .q-title{font-family:var(--mincho);font-size:clamp(21px,2.8vw,28px);letter-spacing:.06em;margin:0 0 28px;font-weight:600;color:var(--sumi)}
 .q-opts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
 .q-opt{border:1px solid var(--line);background:var(--card);border-radius:2px;padding:15px 28px;font-family:var(--gothic);font-size:15px;color:var(--sumi);cursor:pointer;transition:.2s;letter-spacing:.04em}
@@ -251,16 +266,23 @@ section{padding:46px 0}
 .tcard .meta{font-size:12px;color:var(--sumi-faint)}
 
 /* spot cards */
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+/* 写真のある回と無い回で高さが違ってよい。伸ばして揃えると、中身の違いが消えて表になる */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;align-items:start}
 /* 1fr の最小幅は既定で「中身の最小幅」になる。カードの営業時間（nowrap）が長いと列がそれに引きずられ、
    スマホでページ全体が横にスクロールした（スポット詳細の回遊カードで実害）。列は必ず枠に収める */
 .grid>*{min-width:0}
 .spot{background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column}
+/* 写真が無い回は「写真の枠」そのものを作らない（card-spot.php が出し分ける）。トップの
+   12枚中7枚が「NO IMAGE」の灰色の板で、実写真5枚より多かった。枠は残すので罫は足さない */
+.spot--text .in{padding-top:16px}
 .spot .imgwrap{aspect-ratio:3/2}
 .spot .in{padding:20px 22px 22px;display:flex;flex-direction:column;flex:1}
-.noimg{display:grid;place-items:center;width:100%;aspect-ratio:3/2;background:var(--panel);
-  color:var(--sumi-faint);font-family:var(--serif);font-size:11px;letter-spacing:.3em;text-transform:uppercase}
-.cat{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--indigo-soft);text-transform:uppercase}
+/* 「写真がまだ無い」ことを、写真と同じ大きさの灰色の板で知らせない。罫1本に潰す。
+   文字（No Image）が入っていても出ないよう font-size:0 で受ける */
+.noimg{width:100%;height:1px;background:var(--rule);font-size:0;overflow:hidden}
+/* 中身は「四条烏丸｜ラーメン」のような日本語。等幅欧文＋全大文字だと字間が不揃いになる。
+   2026-09-16 の監査でトップのPR欄について指摘したのと同じ不具合が、カード全体にあった */
+.cat{font-family:var(--gothic);font-size:11.5px;letter-spacing:var(--tr-meta);color:var(--sumi-soft)}
 /* 20px だと2行に折り返した見出しがカードの中で重く、写真と張り合っていた。
    1級落として、写真 → 見出し → 補助情報の順に目が動くようにする（2026-09-17） */
 .spot h4{font-family:var(--mincho);font-size:18px;letter-spacing:.05em;margin:9px 0 10px;font-weight:600}
@@ -932,3 +954,40 @@ body.book-zoomed{overflow:hidden}
   .book-top-body{grid-template-columns:1fr}
   .book-cover{max-width:220px}
 }
+
+/* ==========================================================================
+   ▼▼▼ モック専用（PREVIEW ONLY）— テーマには入れないこと ▼▼▼
+
+   editplus-kyoto-mock は staticrypt で HTML を暗号化しているため、マークアップを
+   直せない。本来はテンプレート側でやる変更（feat/de-ai-pass ブランチで実施済み）を、
+   見た目だけ CSS で再現したのがこのブロック。
+   **デザインの方向を見てもらうための仮ごしらえ**であって、実装ではない。
+   WordPress 側にコピーしないこと（テンプレートで正しく直してある）。
+   ========================================================================== */
+
+/* 見出しの上の欧文アイブロウ26箇所。テーマ側では要素ごと削除している。
+   .lsheet-panel / .hotel-fv--single / .nearby-fv の3つは詳細度(0,2,0)で display:block を
+   当てているので、同じ詳細度で並べないと消えない（言語シート・ホテル・現在地ページ） */
+.kicker,.eyebrow,.q-eyebrow,
+.lsheet-panel .kicker,
+.hotel-fv--single .fv-body .kicker,
+.nearby-fv .fv-body .kicker{display:none}
+
+/* 写真が無いときの「NO IMAGE」の板。テーマ側では枠自体を出さない */
+.noimg{display:none}
+
+/* 日本語面に出ている英語のUI文言。テーマ側では i18n の日本語キーに移してある。
+   ここでは日本語ページだけに限定する（/en/ /zh-cn/ 等には当てない） */
+/* #magazine の .more だけは「PDFを見る →」で別物。巻き込むと誤表示になる */
+html[lang="ja"] section:not(#magazine) .more{font-size:0}
+html[lang="ja"] section:not(#magazine) .more::after{content:"すべて見る";font-size:12.5px;letter-spacing:var(--tr-body)}
+html[lang="ja"] .feature .btn{font-size:0}
+html[lang="ja"] .feature .btn::after{content:"記事を読む";font-size:13px;letter-spacing:var(--tr-meta)}
+html[lang="ja"] .hero-search button{font-size:0}
+html[lang="ja"] .hero-search button::after{content:"検索";font-size:14px;letter-spacing:var(--tr-meta)}
+html[lang="ja"] .actions a[href^="tel:"],html[lang="ja"] .actions span,
+html[lang="ja"] .actions a[target="_blank"]{font-size:0}
+html[lang="ja"] .actions a[target="_blank"]::after{content:"地図";font-size:12px}
+html[lang="ja"] .actions a[href^="tel:"]::after{content:"電話";font-size:12px}
+html[lang="ja"] .actions .hours{font-size:12px}
+/* ▲▲▲ PREVIEW ONLY ここまで ▲▲▲ */
