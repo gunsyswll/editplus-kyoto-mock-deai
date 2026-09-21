@@ -267,20 +267,25 @@ section{padding:46px 0}
 .tcard .meta{font-size:12px;color:var(--sumi-faint)}
 
 /* spot cards */
-/* 写真のある回と無い回で高さが違ってよい。伸ばして揃えると、中身の違いが消えて表になる */
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;align-items:start}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
 /* 1fr の最小幅は既定で「中身の最小幅」になる。カードの営業時間（nowrap）が長いと列がそれに引きずられ、
    スマホでページ全体が横にスクロールした（スポット詳細の回遊カードで実害）。列は必ず枠に収める */
 .grid>*{min-width:0}
 .spot{background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column}
-/* 写真が無い回は「写真の枠」そのものを作らない（card-spot.php が出し分ける）。トップの
-   12枚中7枚が「NO IMAGE」の灰色の板で、実写真5枚より多かった。枠は残すので罫は足さない */
-.spot--text .in{padding-top:16px}
+/* 写真の代わりに文字の面が入るので、下の本文との間は写真ありと同じでよい */
+.spot--text .in{padding-top:20px}
 .spot .imgwrap{aspect-ratio:3/2}
 .spot .in{padding:20px 22px 22px;display:flex;flex-direction:column;flex:1}
-/* 「写真がまだ無い」ことを、写真と同じ大きさの灰色の板で知らせない。罫1本に潰す。
-   文字（No Image）が入っていても出ないよう font-size:0 で受ける */
-.noimg{width:100%;height:1px;background:var(--rule);font-size:0;overflow:hidden}
+/* 写真が無い回。罫1本まで潰していたが（2026-09-21 昼）、実データで崩れた:
+   写真ありのカードが383px・無しが143pxで、同じ行に240pxの穴が空く。
+   staging は全件が写真無しで高さが揃っていたため、そこでは見えなかった不具合。
+   → 写真と同じ 3:2 の面で受けて高さを揃える。ただし「NO IMAGE」とは書かず、
+   その場所の名前を置く（card-spot.php が入れる）。面は和紙、下に罫1本だけ。 */
+.noimg{display:grid;place-items:center;width:100%;aspect-ratio:3/2;background:var(--panel);
+  border-bottom:1px solid var(--rule);padding:18px 22px;font-size:0}
+.noimg-name{font-family:var(--mincho);font-size:clamp(15px,1.5vw,19px);letter-spacing:var(--tr-head);
+  line-height:1.5;font-weight:500;color:var(--sumi-soft);text-align:center;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 /* 中身は「四条烏丸｜ラーメン」のような日本語。等幅欧文＋全大文字だと字間が不揃いになる。
    2026-09-16 の監査でトップのPR欄について指摘したのと同じ不具合が、カード全体にあった */
 .cat{font-family:var(--gothic);font-size:12px;letter-spacing:var(--tr-meta);color:var(--sumi-soft)}
@@ -1003,8 +1008,6 @@ body.book-zoomed{overflow:hidden}
 .hotel-fv--single .fv-body .kicker,
 .nearby-fv .fv-body .kicker{display:none}
 
-/* 写真が無いときの「NO IMAGE」の板。テーマ側では枠自体を出さない */
-.noimg{display:none}
 
 /* 日本語面に出ている英語のUI文言。テーマ側では i18n の日本語キーに移してある。
    日本語ページだけに限定する（/en/ /zh-cn/ 等には当てない）。
