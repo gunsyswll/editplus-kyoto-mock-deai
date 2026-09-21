@@ -219,22 +219,6 @@
         </div>
 
         <script>
-/* デモ用（2026-09-21）: この静的書き出しは資産もリンクも
-   https://takumin-2525.github.io/editplus-kyoto-mock/... という**元リポジトリの絶対URL**で
-   持っている。フォークしただけでは、ページは元リポジトリのファイルを読み続けるので、
-   こちらで差し替えた style.css / quiz.js は一度も使われない。
-   staticrypt の replaceHtmlCallback フック（復号後にHTMLを渡してくる公式の口）で、
-   その土台だけを このフォークの土台に置き換える。ファイルの木は元と同じなので、
-   読めるものと読めないものは元のまま変わらない。
-   診断API（kankou-concierge-test.com/wp-json/）は触らない＝動きは変えていない。 */
-function replaceHtmlCallback(plainHTML) {
-    var base = "/" + location.pathname.split("/")[1];
-    var fixed = plainHTML.split("https://takumin-2525.github.io/editplus-kyoto-mock").join(base);
-    document.write(fixed);
-    document.close();
-}
-</script>
-<script>
             // these variables will be filled when generating the file - the template format is 'variable_name'
             const staticryptInitiator = ((function(){
   const exports = {};
@@ -842,7 +826,19 @@ exports.init = init;
             const templateConfig = {
                 rememberExpirationKey: "staticrypt_expiration",
                 rememberPassphraseKey: "staticrypt_passphrase",
-                replaceHtmlCallback: null,
+                // デモ用（2026-09-21）: 復号後のHTMLは、資産もリンクも元リポジトリの絶対URL
+                // （https://takumin-2525.github.io/editplus-kyoto-mock/...）を持っている。
+                // フォークしただけでは元リポジトリのファイルを読み続けるため、差し替えた
+                // style.css / quiz.js が一度も使われない。ここで土台だけを、このフォークの
+                // 土台に置き換える。ファイルの木は元と同じなので、読めるもの・読めないものは
+                // 元から変わらない。診断API（kankou-concierge-test.com/wp-json/）は触らない。
+                replaceHtmlCallback: function (plainHTML) {
+                    var base = "/" + location.pathname.split("/")[1];
+                    document.write(
+                        plainHTML.split("https://takumin-2525.github.io/editplus-kyoto-mock").join(base)
+                    );
+                    document.close();
+                },
                 clearLocalStorageCallback: null,
             };
 
