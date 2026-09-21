@@ -219,6 +219,18 @@
         </div>
 
         <script>
+/* デモ用（2026-09-21）: 静的書き出しのHTMLは資産を客先サーバの絶対URLで読んでいるため、
+   このリポジトリに置いた style.css / quiz.js が使われなかった。staticrypt の
+   replaceHtmlCallback フックで、資産のURLだけを同じ配信元に向け直す。
+   /wp-json/（診断のAPI）は書き換えない＝動きは変えていない。 */
+function replaceHtmlCallback(plainHTML) {
+    var fixed = plainHTML.replace(
+        /https:\/\/kankou-concierge-test\.com(\/wp-(?:content|includes)\/)/g, "$1");
+    document.write(fixed);
+    document.close();
+}
+</script>
+<script>
             // these variables will be filled when generating the file - the template format is 'variable_name'
             const staticryptInitiator = ((function(){
   const exports = {};
