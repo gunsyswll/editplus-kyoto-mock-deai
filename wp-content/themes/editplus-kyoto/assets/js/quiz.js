@@ -20,6 +20,14 @@
 	var T = window.epQuizI18n || {};
 	var t = function (key, fallback) { return T[key] || fallback; };
 	var fmt = function (str, value) { return String(str).replace(/%[ds]/, value); };
+	// 所要時間は移動時間からの目安でしかない（結果画面でもそう断っている）。
+	// 「約4.1時間」は人が言わないうえ、持っていない精度を主張してしまう。30分刻みで丸める
+	var roughHours = function (min) {
+		var half = Math.max(1, Math.round(min / 30));      // 30分単位
+		var h = Math.floor(half / 2);
+		if (half % 2) { return h ? fmt(t('aboutHoursHalf', '約%d時間半'), h) : t('aboutHalfHour', '約30分'); }
+		return fmt(t('aboutHours', '約%s時間'), h);
+	};
 
 	// 設問はサーバー（epQuizI18n.questions ← editplus_ai_concierge_questions()）から来る。
 	// **並びも個数もサーバーが正。**回答はインデックスで送るので、ここで写して1つでも
@@ -89,7 +97,7 @@ function mount(el, options) {
 
 		el.innerHTML = '<div class="q-step">'
 			+ (step > 0 ? '<button type="button" class="q-back">' + esc(t('back', '← 戻る')) + '</button>' : '')
-			+ '<div class="q-prog">QUESTION ' + (step + 1) + ' / ' + QUESTIONS.length + '</div>'
+			+ '<div class="q-prog">' + esc(t('questionLabel', '質問')) + ' ' + (step + 1) + ' / ' + QUESTIONS.length + '</div>'
 			+ '<h3 class="q-title">' + esc(q.title) + '</h3>'
 			+ '<div class="q-opts">' + opts + '</div>'
 			+ '</div>';
@@ -121,7 +129,6 @@ function mount(el, options) {
 
 	function renderLoading() {
 		el.innerHTML = '<div class="q-step">'
-			+ '<div class="q-prog">CONCIERGE</div>'
 			+ '<h3 class="q-title">' + esc(t('building', 'あなたのコースを組み立てています…')) + '</h3>'
 			+ '<div class="q-loading"><span></span><span></span><span></span></div>'
 			+ '<p class="q-note">' + esc(t('buildingNote', '京都観光コンシェルジュが厳選したスポットから、移動時間まで含めて選んでいます（10秒ほどかかることがあります）')) + '</p>'
@@ -130,7 +137,6 @@ function mount(el, options) {
 
 	function renderError(message) {
 		el.innerHTML = '<div class="q-step">'
-			+ '<div class="q-prog">SORRY</div>'
 			+ '<h3 class="q-title">' + esc(message || t('failed', '診断に失敗しました。')) + '</h3>'
 			+ '<div class="q-nav"><button type="button" class="q-next" id="qRetry">' + esc(t('retry', 'もう一度試す')) + '</button></div>'
 			+ '</div>';
@@ -147,7 +153,7 @@ function mount(el, options) {
 		// 'cache' で返ってくる場合もあるので「ai以外は編集部セレクト」で判定する。
 		// source === 'fallback' だけを見ると、キャッシュ済みのフォールバックに
 		// 「Your Route」のバッジが付き、本文の「編集部の定番スポットで組みました」と矛盾する
-		var badge = data.source === 'ai' ? 'Your Route' : 'Editors’ Pick';
+		var badge = data.source === 'ai' ? t('badgeRoute', 'コンシェルジュの提案') : t('badgePick', '編集部のおすすめ');
 		var plan = data.plan || {};
 
 		var rows = (data.spots || []).map(function (s, i) {
@@ -187,7 +193,7 @@ function mount(el, options) {
 		if (startLabel) stats.push('<span>' + esc(fmt(t('fromLabel', '%s発'), startLabel)) + '</span>');
 		if (plan.transport_label) stats.push('<span>' + esc(plan.transport_label) + '</span>');
 		if (plan.begin) stats.push('<span>' + esc(plan.begin) + '–' + esc(plan.end) + '</span>');
-		if (plan.total_min) stats.push('<span>' + esc(fmt(t('aboutHours', '約%s時間'), Math.round(plan.total_min / 60 * 10) / 10)) + '</span>');
+		if (plan.total_min) stats.push('<span>' + esc(roughHours(plan.total_min)) + '</span>');
 		stats.push('<span>' + esc(fmt(t('spotCount', '%d スポット'), (data.spots || []).length)) + '</span>');
 
 		var route = plan.map_url
